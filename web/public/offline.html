@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2f7d4f" />
+    <meta name="robots" content="noindex" />
+    <title>Sin conexión · Campo Inteligente</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f8f3;
+        --card: #ffffff;
+        --text: #1b2a21;
+        --muted: #64756a;
+        --border: #dde5dc;
+        --primary: #2f7d4f;
+        --primary-contrast: #ffffff;
+        --glow: oklch(0.52 0.125 152 / 0.12);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          color-scheme: dark;
+          --bg: #111a14;
+          --card: #18241c;
+          --text: #eef3ed;
+          --muted: #9aab9f;
+          --border: #2b3a30;
+          --primary: #7ed99f;
+          --primary-contrast: #102015;
+          --glow: oklch(0.76 0.14 148 / 0.1);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background:
+          radial-gradient(circle at 50% 0%, var(--glow), transparent 60%),
+          var(--bg);
+        color: var(--text);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 440px;
+        padding: 40px 28px 32px;
+        text-align: center;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: 0 24px 60px -40px rgb(0 0 0 / 0.55);
+      }
+
+      .icon {
+        width: 84px;
+        height: 84px;
+        border-radius: 20px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 20px;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: color-mix(in oklch, var(--primary) 12%, transparent);
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      h1 {
+        margin: 12px 0 8px;
+        font-size: 24px;
+        letter-spacing: -0.025em;
+        text-wrap: balance;
+      }
+
+      p {
+        max-width: 320px;
+        margin: 0 auto;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 26px;
+      }
+
+      button,
+      a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        border-radius: 10px;
+        font: inherit;
+        font-size: 14px;
+        text-decoration: none;
+      }
+
+      button {
+        border: 0;
+        background: var(--primary);
+        color: var(--primary-contrast);
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button:hover {
+        filter: brightness(1.05);
+      }
+
+      a {
+        color: var(--muted);
+      }
+
+      a:hover {
+        color: var(--text);
+      }
+
+      .hint {
+        margin-top: 24px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <img
+        class="icon"
+        src="/icons/icon-192.png"
+        alt="Campo Inteligente"
+        width="84"
+        height="84"
+      />
+      <span class="badge">Sin conexión</span>
+      <h1>No pudimos cargar el panel</h1>
+      <p>
+        Revisa tu conexión a internet. Cuando vuelvas a estar en línea, tus
+        datos se actualizarán automáticamente.
+      </p>
+      <div class="actions">
+        <button type="button" onclick="location.reload()">Reintentar</button>
+        <a href="/">Volver al inicio</a>
+      </div>
+      <p class="hint">
+        Campo Inteligente · Producción, logística y financiamiento
+      </p>
+    </main>
+  </body>
+</html>

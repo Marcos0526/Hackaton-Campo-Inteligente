@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -198,6 +199,7 @@ export function AppShell({
           </div>
 
           <div className="flex items-center gap-1">
+            <InstallAppButton />
             <ThemeToggle />
             <span
               className="ml-1 flex size-9 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground"

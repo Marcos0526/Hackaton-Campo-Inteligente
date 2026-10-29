@@ -44,8 +44,9 @@ La aplicación web se encuentra en [`web/`](./web/README.md).
 - **Stack:** Next.js 16 + TypeScript, Tailwind CSS v4, Better Auth, Drizzle ORM
   (SQLite local), TanStack Query, Zod y Recharts.
 - **Incluye:** registro e inicio de sesión, ajustes de cuenta (perfil,
-  contraseña y preferencias), modo claro/oscuro/sistema, y un panel con
-  indicadores y gráficas de producción, transporte y financiamiento.
+  contraseña y preferencias), modo claro/oscuro/sistema, un panel con
+  indicadores y gráficas de producción, transporte y financiamiento, y soporte
+  PWA instalable con página sin conexión.
 - **Datos:** el panel consume `/api/metrics`, que puede apuntar a una API real
   mediante `METRICS_API_URL`. Sin esa variable usa un conjunto de datos de
   demostración determinista.

@@ -1,5 +1,6 @@
 import { Landmark, Sprout, Tractor, Truck } from "lucide-react";
 import type { ReactNode } from "react";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const PILLARS = [
@@ -89,7 +90,10 @@ export function AuthShell({
             </span>
             <span className="text-sm font-semibold">Campo Inteligente</span>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <InstallAppButton />
+            <ThemeToggle />
+          </div>
         </div>
 
         <div className="flex flex-1 items-center justify-center px-4 pb-12 sm:px-6">

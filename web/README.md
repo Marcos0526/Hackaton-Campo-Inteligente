@@ -20,8 +20,10 @@ The UI is in Spanish; the code and this document are in English.
   data, so the app runs end-to-end with zero infrastructure.
 - **Typed API boundary** with Zod contracts, TanStack Query caching and SSR
   hydration.
-- **Tests**: Vitest unit tests for the data layer plus a Playwright end-to-end
-  flow covering registration, dashboard, theme and settings.
+- **Installable PWA**: web app manifest, maskable icons, install button, and an
+  offline fallback served by a service worker.
+- **Tests**: Vitest unit tests for the data layer plus Playwright end-to-end
+  flows covering registration, dashboard, theme, settings and PWA behaviour.
 
 ## Stack
 
@@ -34,7 +36,7 @@ The UI is in Spanish; the code and this document are in English.
 | Data fetching | TanStack Query v5 + Zod v4 |
 | Charts | Recharts 3 |
 | Forms | react-hook-form + Zod |
-| Tests | Vitest, Playwright (Firefox) |
+| Tests | Vitest, Playwright (Firefox for auth flow, Chromium for PWA) |
 
 ## Quick start
 
@@ -74,12 +76,18 @@ the database is local and ignored by git.
 | `npm run lint` | ESLint. |
 | `npm run typecheck` | `tsc --noEmit`. |
 | `npm test` | Vitest unit tests. |
-| `npm run test:e2e` | Playwright flow (start the dev server first, or let it start one). |
+| `npm run test:e2e` | Playwright auth flow (start the dev server first, or let it start one). |
+| `npm run test:pwa` | Production build + PWA/manifest/service-worker checks (Chromium). |
+| `npm run icons:generate` | Regenerate PWA icons from the inline SVG source. |
 | `npm run db:generate` | Generate a Drizzle migration after changing the schema. |
 | `npm run db:migrate` | Apply pending migrations. |
 | `npm run db:studio` | Open Drizzle Studio. |
 
-For the E2E test, install the browser once: `npx playwright install firefox`.
+For the E2E test, install the browsers once:
+
+```bash
+npx playwright install firefox chromium
+```
 
 ## Routes
 
@@ -91,6 +99,8 @@ For the E2E test, install the browser once: `npx playwright install firefox`.
 | `/settings` | session | Profile, password and preferences. |
 | `/api/auth/[...all]` | public | Better Auth handler. |
 | `/api/metrics` | session | Metrics proxy / demo generator. |
+| `/manifest.webmanifest` | public | Web app manifest. |
+| `/offline.html` | public | Offline fallback precached by the service worker. |
 
 `src/proxy.ts` performs an optimistic session-cookie check (Next 16 renamed
 middleware to proxy). Every protected layout still validates the session
@@ -173,6 +183,7 @@ src/
   components/
     dashboard/   KPI cards, chart card, Recharts wrapper, breakdown, range filter
     settings/    Profile, password and preferences forms
+    pwa/         Service worker registration and install button
     ui/          Button, input, card, select, skeleton, form message
     app-shell.tsx, theme-toggle.tsx, theme-sync.tsx
   lib/
@@ -185,7 +196,13 @@ src/
     preferences.ts
   proxy.ts       Optimistic route protection
 drizzle/         SQL migrations (committed)
-e2e/             Playwright flow
+e2e/             Playwright flow and PWA checks
+public/
+  sw.js          Service worker (production only)
+  offline.html   Offline fallback
+  icons/         Generated PWA icons
+scripts/
+  generate-icons.mjs
 ```
 
 ### Data model
@@ -201,6 +218,58 @@ previews the theme immediately and persists it through a server action; the
 header toggle persists too. On the first page load of a browser tab,
 `ThemeSync` applies the account preference (once per tab, tracked in
 `sessionStorage`), so a local toggle is not overwritten on every navigation.
+
+## PWA
+
+The app ships as an installable PWA without a runtime dependency or extra
+build step.
+
+- `src/app/manifest.ts` is served at `/manifest.webmanifest`: standalone
+  display, Spanish metadata, 192/512 icons, maskable variants and shortcuts to
+  `/dashboard` and `/settings`.
+- `scripts/generate-icons.mjs` renders the PNG icons with `sharp` into
+  `public/icons/` plus the Next.js `icon.png` / `apple-icon.png` metadata files.
+  Edit the SVG in that script and run `npm run icons:generate` to change the
+  artwork.
+- `src/components/pwa/install-app-button.tsx` shows an install button only when
+  the browser fires `beforeinstallprompt`; it hides itself when the app is
+  already installed or running in standalone mode. Firefox never fires that
+  event, so no button is shown there.
+- `src/components/pwa/service-worker-register.tsx` registers `/sw.js` on the
+  `load` event, **production only**. In development the service worker is
+  disabled so Turbopack's changing assets are never cached.
+
+### Offline and caching behaviour
+
+`public/sw.js` intentionally keeps caching conservative:
+
+| Request | Strategy |
+| --- | --- |
+| Navigations (HTML) | Network-first; authenticated HTML is never cached. Falls back to `/offline.html`. |
+| `/api/*` | Not intercepted, so metrics and auth are never served stale. |
+| `/manifest.webmanifest` | Network-first with a cached fallback. |
+| `/_next/static/*`, `/icons/*` | Cache-first (immutable, fingerprinted assets). |
+
+`/offline.html` is precached at install time and is a self-contained branded
+page, including dark mode. It offers a retry button and a link home.
+
+The worker only activates over **HTTPS** (or `localhost`), which browsers
+require for service workers. After deploying a build, bump `VERSION` in
+`public/sw.js` whenever the caching strategy, precache list or offline page
+changes; activation deletes caches from older versions. The `install` handler
+calls `skipWaiting()` and `activate` calls `clients.claim()`, so a new worker
+takes over on the next load.
+
+To verify locally:
+
+```bash
+npm run test:pwa
+```
+
+This builds the app, starts it on port `3100`, checks the manifest and icons,
+waits for the service worker, then goes offline and asserts the fallback page.
+Chromium is used because Playwright's Firefox offline emulation does not block
+service-worker network fetches.
 
 ## Production notes
 
@@ -224,3 +293,5 @@ serverless host is ephemeral, so before deploying:
   not meant to represent real operations.
 - The upstream response must match the documented contract exactly; add a
   mapping layer if your API uses different field names.
+- Offline support is a branded fallback page, not offline data access:
+  authenticated HTML and `/api/*` responses are deliberately never cached.
