@@ -1,38 +1,57 @@
-# Hackaton-Campo-Inteligente
+# Campo Inteligente — Plataforma Agrocomercial
 
-## 📌 Descripción del reto
+Plataforma agrocomercial modular desarrollada como Progressive Web App (PWA) para conectar a productores agrícolas, transportistas y compradores.
 
-La idea de este reto es desarrollar una herramienta que ayude a productores en el campo a resolver tres problemáticas:
+## 🚀 Requisitos previos
 
-1. **El campo** — que nos habla de una capacidad operativa, maximización de ganancias.
-2. **Transporte de mercancias** — en base a la localidad del productor y a dónde se venderá el producto.
-3. **Acceso a financiamientos** — información basada en los productos y en la capacidad de generar dinero.
+- Node.js (v18 o superior)
+- npm
 
----
+## 📦 Instalación y configuración
 
-## 🧠 Explicación profesional
+1. Clonar el repositorio y configurar las variables de entorno basándose en `.env.example`.
+2. Instalar todas las dependencias del monorepo:
 
-### Visión general
+```bash
+npm run install:all
+```
 
-Se resume la declaración de intención del hackathon: el agro no es solo producción, sino un **sistema productivo → logístico → financiero**. La herramienta busca apoyar al productor en la toma de decisiones económicas a través de tres módulos integrados.
+3. Configurar la base de datos y cargar los **9 perfiles de prueba**:
 
-### Problema 1 — "El campo" (capacidad operativa y maximización de ganancias)
+```bash
+npm run db:setup
+```
 
-- **Capacidad operativa:** gestión de la finca, cultivos, insumos, tierras y recursos.
-- **Maximización de ganancias:** eficiencia en costos, estimación de rendimiento y decisiones orientadas a incrementar el margen del productor.
+## 🛠️ Ejecución local en desarrollo
 
-### Problema 2 — Transporte de mercancías (localidad + punto de venta)
+Para iniciar tanto el backend como el frontend en paralelo:
 
-- La logística depende de la **localidad del productor** y del **destino de venta**.
-- Gestiona rutas, tiempos, costos de transporte y capacidad de carga, impactando en pérdidas post-cosecha y en el precio final percibido.
+```bash
+npm run dev
+```
 
-### Problema 3 — Acceso a financiamiento (información basada en productos / capacidad de generar dinero)
-
-- El productor carece de historial crediticio.
-- La herramienta genera la información necesaria (basada en sus productos y en su capacidad de generar ingresos) para respaldar el acceso a financiamiento.
-
-### Objetivo general
-
-> Desarrollar una herramienta integral que conecte gestión agrícola, optimización logística de transporte y acceso a financiamiento, para que el productor tome decisiones económicas informadas.
+- **Backend:** `http://localhost:4000`
+- **Frontend PWA:** `http://localhost:5173`
 
 ---
+
+## 👥 Perfiles de prueba iniciales (Seed)
+
+| Identificador | Rol | Descripción |
+|---|---|---|
+| PROD-01 | Productor | Producto disponible inmediatamente |
+| PROD-02 | Productor | Cosecha futura y estimación de costos |
+| PROD-03 | Productor | Capacidad productiva registrada |
+| TRAN-01 | Transportista | Capacidad para carga completa |
+| TRAN-02 | Transportista | Carga parcial |
+| TRAN-03 | Transportista | Disponibilidad limitada |
+| BUY-01 | Comprador | Busca producto con presupuesto definido |
+| BUY-02 | Comprador | Flexibilidad de precio y fecha |
+| BUY-03 | Comprador | Sin coincidencias actuales |
+
+## 📱 Funcionalidades PWA
+
+La aplicación incluye un manifest y Service Worker configurados mediante `vite-plugin-pwa`, permitiendo su instalación en dispositivos móviles Android y escritorio.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+Co-Authored-By: Claude Code <noreply@anthropic.com>

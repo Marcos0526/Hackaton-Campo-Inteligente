@@ -1,0 +1,176 @@
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role          String    @default("producer") // 'producer', 'transporter', 'buyer'
+
+  sessions      Session[]
+  accounts      Account[]
+
+  producerProfile ProducerProfile?
+  transporterProfile TransporterProfile?
+  buyerProfile BuyerProfile?
+
+  offers        CommercialOffer[]
+  buyerRequests BuyerRequest[]
+  notifications Notification[]
+  financialRequests FinancialRequest[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id           String    @id
+  accountId    String
+  providerId   String
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken  String?
+  refreshToken String?
+  idToken      String?
+  expiresAt    DateTime?
+  password     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+}
+
+model ProducerProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  farmName        String
+  location        String
+  totalLand       Float    // hectáreas
+  cultivatedLand  Float
+  crops           String   // JSON or comma-separated
+  storageCapacity String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model TransporterProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  baseLocation    String
+  vehicleType     String   // 'camion_caja', 'camion_redilas', 'camioneta'
+  loadCapacityKg  Float    // kg
+  routes          String   // Zonas habituales
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  quotes          TransportQuote[]
+}
+
+model BuyerProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName     String
+  deliveryLocation String
+  preferredCrops  String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model CommercialOffer {
+  id             String   @id @default(uuid())
+  producerId     String
+  producer       User     @relation(fields: [producerId], references: [id], onDelete: Cascade)
+  productName    String
+  quantity       Float
+  unit           String   // 'toneladas', 'kg', 'bultos'
+  quality        String   // 'primera', 'segunda'
+  pricePerUnit   Float
+  availableDate  DateTime
+  status         String   @default("published") // 'published', 'negotiating', 'confirmed', 'completed', 'cancelled'
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  operations     CommercialOperation[]
+}
+
+model BuyerRequest {
+  id             String   @id @default(uuid())
+  buyerId        String
+  buyer          User     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  productName    String
+  quantity       Float
+  unit           String
+  targetPriceMin Float
+  targetPriceMax Float
+  deliveryDate   DateTime
+  status         String   @default("published")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  operations     CommercialOperation[]
+}
+
+model TransportQuote {
+  id             String   @id @default(uuid())
+  transporterId  String
+  transporter    TransporterProfile @relation(fields: [transporterId], references: [id], onDelete: Cascade)
+  operationId    String?
+  operation      CommercialOperation? @relation(fields: [operationId], references: [id], onDelete: SetNull)
+  origin         String
+  destination    String
+  distanceKm     Float
+  quotedPrice    Float
+  status         String   @default("pending") // 'pending', 'accepted', 'rejected'
+  createdAt      DateTime @default(now())
+}
+
+model CommercialOperation {
+  id             String   @id @default(uuid())
+  offerId        String?
+  offer          CommercialOffer? @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  buyerRequestId String?
+  buyerRequest   BuyerRequest? @relation(fields: [buyerRequestId], references: [id], onDelete: SetNull)
+  status         String   @default("draft") // 'draft', 'published', 'negotiating', 'awaiting_confirmation', 'confirmed', 'transport_pending', 'in_transit', 'delivered', 'completed', 'cancelled', 'disputed'
+  agreedPrice    Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  transportQuotes TransportQuote[]
+}
+
+model FinancialRequest {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  estimatedCosts Float
+  requestedAmount Float
+  projectedSales Float
+  status         String   @default("submitted") // 'submitted', 'reviewing', 'estimated'
+  createdAt      DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

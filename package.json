@@ -1,0 +1,20 @@
+{
+  "name": "campo-inteligente",
+  "version": "1.0.0",
+  "description": "Plataforma agrocomercial PWA (Productores, Transportistas, Compradores)",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "db:setup": "npm run db:generate --prefix server && npm run db:migrate --prefix server && npm run db:seed --prefix server",
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix server && npm run build --prefix client",
+    "test": "npm test --prefix server && npm test --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
