@@ -26,6 +26,7 @@ model User {
 
   offers        CommercialOffer[]
   buyerRequests BuyerRequest[]
+  buyerOperations CommercialOperation[] @relation("BuyerOperations")
   notifications Notification[]
   financialRequests FinancialRequest[]
 }
@@ -159,6 +160,9 @@ model CommercialOperation {
   offer          CommercialOffer? @relation(fields: [offerId], references: [id], onDelete: SetNull)
   buyerRequestId String?
   buyerRequest   BuyerRequest? @relation(fields: [buyerRequestId], references: [id], onDelete: SetNull)
+  buyerId        String?
+  buyer          User?    @relation("BuyerOperations", fields: [buyerId], references: [id], onDelete: SetNull)
+  quantity       Float?
   status         String   @default("draft") // 'draft', 'published', 'negotiating', 'awaiting_confirmation', 'confirmed', 'transport_pending', 'in_transit', 'delivered', 'completed', 'cancelled', 'disputed'
   agreedPrice    Float?
   createdAt      DateTime @default(now())

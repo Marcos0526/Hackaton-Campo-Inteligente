@@ -16,5 +16,11 @@
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "prisma": true,
+    "@prisma/client": true,
+    "@prisma/engines": true
   }
 }

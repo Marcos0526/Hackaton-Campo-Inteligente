@@ -1,6 +1,10 @@
 import { PrismaClient } from '@prisma/client'
+import { hashPassword } from 'better-auth/crypto'
 
 const prisma = new PrismaClient()
+
+// Contraseña compartida por todos los perfiles de prueba (solo para demo).
+const DEMO_PASSWORD = 'campo1234'
 
 async function main() {
   console.log("Seeding extended test profiles for Campo Inteligente...")
@@ -118,21 +122,60 @@ async function main() {
     });
   }
 
-  // Sample Offer
-  await prisma.commercialOffer.create({
-    data: {
-      producerId: "PROD-01",
-      productName: "Jitomate Saladette",
-      quantity: 10,
-      unit: "toneladas",
-      quality: "primera",
-      pricePerUnit: 15000,
-      availableDate: new Date(),
-      status: "published"
-    }
-  });
+  // --- 4. CREDENTIAL ACCOUNTS (login con email + contraseña vía Better Auth) ---
+  const allUsers = await prisma.user.findMany();
+  const passwordHash = await hashPassword(DEMO_PASSWORD);
+  for (const u of allUsers) {
+    await prisma.account.create({
+      data: {
+        id: `cred-${u.id}`,
+        accountId: u.id,
+        providerId: 'credential',
+        userId: u.id,
+        password: passwordHash,
+      },
+    });
+  }
+
+  // Sample Offers
+  const offersData = [
+    { producerId: "PROD-01", productName: "Jitomate Saladette", quantity: 10, unit: "toneladas", quality: "primera", pricePerUnit: 15000 },
+    { producerId: "PROD-02", productName: "Aguacate Hass", quantity: 5, unit: "toneladas", quality: "primera", pricePerUnit: 42000 },
+    { producerId: "PROD-03", productName: "Maíz Amarillo", quantity: 25, unit: "toneladas", quality: "segunda", pricePerUnit: 6800 },
+    { producerId: "PROD-04", productName: "Uva de Mesa", quantity: 8, unit: "toneladas", quality: "primera", pricePerUnit: 35000 },
+    { producerId: "PROD-07", productName: "Fresa", quantity: 3, unit: "toneladas", quality: "primera", pricePerUnit: 28000 },
+  ];
+
+  for (const o of offersData) {
+    await prisma.commercialOffer.create({
+      data: {
+        ...o,
+        availableDate: new Date(),
+        status: "published",
+      },
+    });
+  }
+
+  // Sample Buyer Requests
+  const requestsData = [
+    { buyerId: "BUY-01", productName: "Jitomate Saladette", quantity: 12, unit: "toneladas", targetPriceMin: 13000, targetPriceMax: 16000 },
+    { buyerId: "BUY-02", productName: "Maíz Amarillo", quantity: 30, unit: "toneladas", targetPriceMin: 6000, targetPriceMax: 7500 },
+    { buyerId: "BUY-04", productName: "Aguacate Hass", quantity: 4, unit: "toneladas", targetPriceMin: 38000, targetPriceMax: 45000 },
+    { buyerId: "BUY-07", productName: "Fresa", quantity: 2, unit: "toneladas", targetPriceMin: 25000, targetPriceMax: 30000 },
+  ];
+
+  for (const r of requestsData) {
+    await prisma.buyerRequest.create({
+      data: {
+        ...r,
+        deliveryDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        status: "published",
+      },
+    });
+  }
 
   console.log("Seed completed: 30 test profiles created.");
+  console.log(`Demo login password for every profile: ${DEMO_PASSWORD}`);
 }
 
 main()

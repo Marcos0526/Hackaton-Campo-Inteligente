@@ -15,6 +15,8 @@ Plataforma agrocomercial modular desarrollada como **Progressive Web App (PWA)**
 - [Requisitos previos](#requisitos-previos)
 - [Instalación y configuración](#instalación-y-configuración)
 - [Ejecución en desarrollo](#ejecución-en-desarrollo)
+- [Acceso de prueba](#-acceso-de-prueba)
+- [Configurar el LLM](#-configurar-el-llm)
 - [Base de datos y seed](#base-de-datos-y-seed)
 - [Estado actual y hoja de ruta](#estado-actual-y-hoja-de-ruta)
 
@@ -95,8 +97,17 @@ campo-inteligente/
 
 ### 🤖 Asistente inteligente
 
-- Interfaz de chat orientada a asesorar al usuario.
-- Flujo actual: el usuario escribe → el asistente responde con opciones de oferta → se abre detalle → se registra compra.
+- Chat de inicio en lenguaje natural conectado a un **LLM real** (API compatible con OpenAI).
+- El backend consulta las ofertas y solicitudes publicadas y el modelo elige las mejores opciones.
+- La respuesta muestra **tarjetas con enlaces** a esas opciones y acciones (comprar, ver en el mercado).
+- Tono amable y lenguaje sencillo, pensado para personas sin conocimientos técnicos.
+- Si el proveedor de IA falla o no está configurado, se usa una búsqueda local como respaldo.
+
+### 🛒 Compras y viajes
+
+- Los **compradores** pueden comprar una oferta indicando la cantidad; el inventario se descuenta.
+- Los **transportistas** ven los viajes disponibles y aceptan uno; se estiman distancia y flete.
+- Las operaciones avanzan por estados: confirmada → transporte asignado → en tránsito → entregada → completada.
 
 ## 🔌 API — Endpoints
 
@@ -104,7 +115,18 @@ campo-inteligente/
 |---|---|---|---|
 | GET | `/api/health` | Health check del servicio | Público |
 | GET | `/api/offers` | Lista de ofertas comerciales con estado `published` | Público |
+| GET | `/api/offers/mine` | Ofertas del productor autenticado | Autenticado (rol `producer`) |
 | POST | `/api/offers` | Crea una oferta comercial | Autenticado (rol `producer`) |
+| GET | `/api/requests` | Lista de solicitudes de comprador publicadas | Público |
+| GET | `/api/requests/mine` | Solicitudes del comprador autenticado | Autenticado (rol `buyer`) |
+| POST | `/api/requests` | Crea una solicitud de compra | Autenticado (rol `buyer`) |
+| GET | `/api/profile` | Perfil completo del usuario autenticado | Autenticado |
+| POST | `/api/operations/buy` | Compra una oferta (cantidad e importe) | Autenticado (rol `buyer`) |
+| GET | `/api/operations/available` | Viajes disponibles para transportistas | Autenticado (rol `transporter`) |
+| POST | `/api/operations/:id/accept-transport` | Acepta un viaje y genera cotización | Autenticado (rol `transporter`) |
+| GET | `/api/operations/mine` | Operaciones del usuario según su rol | Autenticado |
+| PATCH | `/api/operations/:id/status` | Actualiza el estado de una operación | Participantes |
+| POST | `/api/assistant/chat` | Chat con el asistente IA | Autenticado |
 | `/api/auth/*` | — | Endpoints de autenticación (Better Auth) | Variable |
 
 **Endpoint de creación de oferta** — `POST /api/offers`:
@@ -129,7 +151,9 @@ campo-inteligente/
 │   ├── vite.config.ts
 │   └── src/
 │       ├── App.tsx
-│       └── main.tsx
+│       ├── main.tsx
+│       ├── components/       # Auth, Chat, Mercado, Procesos, Perfil y UI
+│       └── lib/              # Cliente de API y de Better Auth
 ├── server/
 │   ├── prisma/
 │   │   ├── migrations/
@@ -140,9 +164,13 @@ campo-inteligente/
 │       ├── index.ts
 │       ├── lib/
 │       │   ├── auth.ts
-│       │   └── prisma.ts
+│       │   ├── prisma.ts
+│       │   ├── session.ts
+│       │   └── llm.ts
 │       └── routes/
-│           └── commercial.ts
+│           ├── commercial.ts
+│           ├── operations.ts
+│           └── assistant.ts
 ├── prisma/
 │   ├── schema.prisma
 │   └── seed.ts
@@ -197,6 +225,40 @@ npm run dev
 - **Backend:** `http://localhost:4000`
 - **Frontend PWA:** `http://localhost:5173`
 
+## 🔑 Acceso de prueba
+
+Todos los perfiles del seed comparten la contraseña **`campo1234`**.
+
+| Correo | Rol |
+|---|---|
+| `prod-01@campo.test` | Productor |
+| `tran-01@campo.test` | Transportista |
+| `buy-01@campo.test` | Comprador |
+
+Los perfiles siguen el patrón `prod-XX`, `tran-XX` y `buy-XX` (del `01` al `10`) con `@campo.test`.
+
+La autenticación es real (Better Auth, email + contraseña) y el frontend consume la API
+(`/api/offers`, `/api/requests`, `/api/profile`) con la sesión por cookie.
+
+## 🤖 Configurar el LLM
+
+El asistente funciona sin configuración usando un proveedor público de demostración.
+Para usar un modelo propio, agrega una de estas variables en `.env` (o `server/.env`):
+
+```bash
+# Groq (gratis y rápido)
+GROQ_API_KEY="tu_api_key"
+
+# También soportados: OPENAI_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY
+# o cualquier endpoint compatible con OpenAI:
+LLM_BASE_URL="https://api.groq.com/openai/v1"
+LLM_API_KEY="tu_api_key"
+LLM_MODEL="llama-3.3-70b-versatile"
+```
+
+Si el proveedor falla, el asistente responde con una búsqueda local amable sobre los mismos
+datos, para que la app nunca se quede sin respuesta.
+
 ## 🧪 Pruebas
 
 ```bash
@@ -226,15 +288,17 @@ El script de seed crea usuarios con los roles y perfiles descritos a continuaci�
 | Transportista | `TRAN-01` – `TRAN-10` | Perfiles con tipo de vehículo, capacidad de carga y rutas habituales. |
 | Comprador | `BUY-01` – `BUY-10` | Perfiles con empresas, ubicaciones de entrega y cultivos preferidos. |
 
-Además, se crea una **oferta comercial de ejemplo** (`Jitomate Saladette`) asociada al productor `PROD-01`.
+Además, se crean **ofertas y solicitudes de ejemplo** para que el mercado no aparezca vacío.
+Ejecutar `npm run db:seed` reinicia los datos de prueba (borra usuarios, ofertas y solicitudes).
 
 ## 🗺️ Estado actual y hoja de ruta
 
-- ✅ Frontend PWA (React + Vite) con asistente de chat y detalle de ofertas.
-- ✅ Backend con autenticación (Better Auth) y endpoints de ofertas comerciales.
-- ✅ Esquema Prisma completo de usuarios, perfiles, ofertas, operaciones, transporte, finanzas y notificaciones.
-- 🚧 Integración del frontend con la API real (actualmente el chat y el login son simulados en UI).
-- 🚧 Implementación de endpoints para solicitudes de comprador, operaciones, cotizaciones, finanzas y notificaciones.
+- ✅ Frontend PWA (React + Vite) conectado a la API real.
+- ✅ Autenticación real (Better Auth) con sesión por cookie y tres roles.
+- ✅ Compra de ofertas y aceptación de viajes con cotización estimada.
+- ✅ Asistente con LLM real y recomendaciones basadas en la base de datos.
+- ✅ Seguimiento de operaciones por estados.
+- 🚧 Solicitudes financieras, notificaciones en UI y pruebas automatizadas.
 
 ---
 
