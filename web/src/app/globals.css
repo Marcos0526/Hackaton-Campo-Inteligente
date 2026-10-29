@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: oklch(0.985 0.006 120);
+  --foreground: oklch(0.22 0.025 150);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.025 150);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.025 150);
+  --primary: oklch(0.52 0.125 152);
+  --primary-foreground: oklch(0.99 0.01 120);
+  --secondary: oklch(0.95 0.015 130);
+  --secondary-foreground: oklch(0.3 0.04 150);
+  --muted: oklch(0.955 0.01 130);
+  --muted-foreground: oklch(0.5 0.02 150);
+  --accent: oklch(0.94 0.03 142);
+  --accent-foreground: oklch(0.3 0.06 150);
+  --destructive: oklch(0.58 0.2 27);
+  --destructive-foreground: oklch(0.99 0.01 120);
+  --border: oklch(0.9 0.015 130);
+  --input: oklch(0.9 0.015 130);
+  --ring: oklch(0.52 0.125 152);
+
+  --chart-1: oklch(0.55 0.14 150);
+  --chart-2: oklch(0.72 0.15 75);
+  --chart-3: oklch(0.58 0.12 245);
+  --chart-4: oklch(0.63 0.14 40);
+  --chart-5: oklch(0.55 0.12 300);
+
+  --sidebar: oklch(0.97 0.01 130);
+  --card-shadow: 0 1px 2px oklch(0.2 0.02 150 / 0.05),
+    0 8px 24px -12px oklch(0.2 0.02 150 / 0.18);
+}
+
+.dark {
+  --background: oklch(0.16 0.015 150);
+  --foreground: oklch(0.95 0.01 130);
+  --card: oklch(0.205 0.016 150);
+  --card-foreground: oklch(0.95 0.01 130);
+  --popover: oklch(0.205 0.016 150);
+  --popover-foreground: oklch(0.95 0.01 130);
+  --primary: oklch(0.76 0.14 148);
+  --primary-foreground: oklch(0.19 0.04 150);
+  --secondary: oklch(0.26 0.018 150);
+  --secondary-foreground: oklch(0.93 0.01 130);
+  --muted: oklch(0.25 0.016 150);
+  --muted-foreground: oklch(0.7 0.02 145);
+  --accent: oklch(0.28 0.03 150);
+  --accent-foreground: oklch(0.93 0.01 130);
+  --destructive: oklch(0.65 0.19 27);
+  --destructive-foreground: oklch(0.15 0.02 150);
+  --border: oklch(0.3 0.02 150);
+  --input: oklch(0.3 0.02 150);
+  --ring: oklch(0.76 0.14 148);
+
+  --chart-1: oklch(0.76 0.15 148);
+  --chart-2: oklch(0.8 0.15 82);
+  --chart-3: oklch(0.7 0.12 245);
+  --chart-4: oklch(0.72 0.14 45);
+  --chart-5: oklch(0.72 0.12 300);
+
+  --sidebar: oklch(0.18 0.015 150);
+  --card-shadow: 0 1px 2px oklch(0 0 0 / 0.3),
+    0 12px 32px -16px oklch(0 0 0 / 0.55);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --shadow-card: var(--card-shadow);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  ::selection {
+    background-color: color-mix(in oklch, var(--color-primary) 25%, transparent);
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+}

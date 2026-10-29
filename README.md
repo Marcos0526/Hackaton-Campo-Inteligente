@@ -36,3 +36,29 @@ Se resume la declaración de intención del hackathon: el agro no es solo produc
 > Desarrollar una herramienta integral que conecte gestión agrícola, optimización logística de transporte y acceso a financiamiento, para que el productor tome decisiones económicas informadas.
 
 ---
+
+## 💻 Implementación
+
+La aplicación web se encuentra en [`web/`](./web/README.md).
+
+- **Stack:** Next.js 16 + TypeScript, Tailwind CSS v4, Better Auth, Drizzle ORM
+  (SQLite local), TanStack Query, Zod y Recharts.
+- **Incluye:** registro e inicio de sesión, ajustes de cuenta (perfil,
+  contraseña y preferencias), modo claro/oscuro/sistema, y un panel con
+  indicadores y gráficas de producción, transporte y financiamiento.
+- **Datos:** el panel consume `/api/metrics`, que puede apuntar a una API real
+  mediante `METRICS_API_URL`. Sin esa variable usa un conjunto de datos de
+  demostración determinista.
+
+### Arranque rápido
+
+```bash
+cd web
+npm install
+cp .env.example .env.local   # agrega BETTER_AUTH_SECRET (openssl rand -base64 32)
+npm run db:migrate
+npm run dev                  # http://localhost:3000
+```
+
+Consulta [`web/README.md`](./web/README.md) para el contrato de la API, scripts
+y notas de despliegue.
